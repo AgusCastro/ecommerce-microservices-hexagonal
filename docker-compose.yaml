@@ -1,0 +1,80 @@
+name: e-commerce-app
+
+services:
+  orders-db:
+    image: mongo:8.0.0
+    container_name: orders-db
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: orders
+    networks:
+      - e-commerce-net
+
+  zookeeper:
+    image: confluentinc/cp-zookeeper:latest
+    container_name: zookeeper
+    environment:
+      ZOOKEEPER_CLIENT_PORT: 2181
+      ZOOKEEPER_TICK_TIME: 2000
+    ports:
+      - "2181:2181"
+    volumes:
+      - zookeeper_data:/var/lib/zookeeper
+    networks:
+      - e-commerce-net
+
+  products-broker:
+    image: confluentinc/cp-kafka:latest
+    container_name: products-broker
+    depends_on:
+      - zookeeper
+    environment:
+      KAFKA_BROKER_ID: 1
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+      KAFKA_ADVERTISED_LISTENERS: PLAINTEXT://localhost:9092
+      KAFKA_LISTENERS: PLAINTEXT://0.0.0.0:9092
+      KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR: 1
+      KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/var/lib/kafka
+    networks:
+      - e-commerce-net
+
+  inventory-db:
+    image: mysql:8.1.0
+    container_name: inventory-db
+    ports:
+      - "3306:3306"
+    environment:
+      MYSQL_DATABASE: inventory
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_USER: test
+      MYSQL_PASSWORD: test
+    networks:
+      - e-commerce-net
+
+  products-db:
+    image: mongo:8.0.0
+    container_name: products-db
+    ports:
+      - "27018:27017"
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root
+      MONGO_INITDB_DATABASE: products
+    networks:
+      - e-commerce-net
+
+volumes:
+  zookeeper_data:
+  kafka_data:
+
+networks:
+  e-commerce-net:
+    driver: bridge

@@ -1,0 +1,24 @@
+POST http://localhost:8081/products/
+Content-Type: application/json
+
+{
+    "productId": "2",
+    "name": "iPhone",
+    "category": "Electronics",
+    "description": "Apple iPhone 12",
+    "price": "799",
+    "stock": "349",
+      "attributes": {
+        "manufacturer": "Apple",
+        "color": "Black",
+        "storage": "128GB"
+      }
+}
+
+###
+
+
+http://localhost:8081/products/
+
+// create a product using a post request
+
